@@ -28,9 +28,12 @@ def function_query(query):
     print(CT_PROLOG)
     func_activations = list(CT_PROLOG.query("activation(TrialId,Id,"+function_name+",Line,Start,Finish,CallerActivationId)"))
     if (len(func_activations)> 0):
+        print("Activations of Function: "+str(function_name))
         for res in func_activations:
-            print("ActivationId: "+ str(res['Id'])+" at line: "+str(res['Line']))
-
+            print(" |> ActivationId: "+ str(res['Id'])+" at line: "+str(res['Line']))
+            objs = list(CT_PROLOG.query("object_value(TrialId,"+str(res['Id'])+",Id,Name,Value,Type)."))
+            for obj in objs:
+                print(" |>->  Name: "+str(obj['Name'])+" Value: "+obj['Value'])
 
 
 def menu():
