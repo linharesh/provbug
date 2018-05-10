@@ -25,8 +25,8 @@ def variable_query(query):
 
 def function_query(query):
     function_name = query.replace(CT_FUNCTION, "").replace(" ", "")
-    print(CT_PROLOG)
     func_activations = list(CT_PROLOG.query("activation(TrialId,Id,"+function_name+",Line,Start,Finish,CallerActivationId)"))
+    
     if (len(func_activations)> 0):
         print("Activations of Function: "+str(function_name))
         for res in func_activations:
