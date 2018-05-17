@@ -14,10 +14,10 @@ CT_PROLOG.consult(file_name)
 print("Provenance data loaded.")
 
 def help():
-    print("ProvBug: Find bugs by inspect your script past execution.")
+    print("ProvBug: Find bugs by inspecting your script past execution.")
     print("Queries:")
     print(CT_VARIABLE+" [VARIABLE_NAME] to inspect a variable")
-    print(CT_FUNCTION+" [FUNCTION_NAME] to inspect functn calls")
+    print(CT_FUNCTION+" [FUNCTION_NAME] to inspect function calls")
     print("Type exit to finish.")
 
 def get_function_name(activationId):
