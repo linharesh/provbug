@@ -4,7 +4,14 @@ import sys
 CT_VARIABLE = "var"
 CT_FUNCTION = "func"
 
-trial = sys.argv[1].replace("trial", "")
+def help():
+    print("ProvBug: Find bugs by inspecting your script past execution.")
+    print(" \t\tcommand:")
+    print(" " + CT_VARIABLE + " [VARIABLE_NAME] \t\t\t : inspect all values assigned for [VARIABLE_NAME].")
+    print(" " + CT_VARIABLE + " [VARIABLE_NAME] [CONDITION] [VALUE] : inspect all values assigned for [VARIABLE_NAME]")
+    print(" \t\t\t\t\t   that are [CONDITION] [VALUE]. eg \'var result > 20\'")
+    print(" " + CT_FUNCTION + " [FUNCTION_NAME] \t\t\t : inspect all values used inside [FUNCTION_NAME].")
+    print(" exit\t\t\t\t\t : to exit ProvBug.")    
 
 def connectNoworkflowSqlite():
     return sqlite3.connect('.noworkflow/db.sqlite').cursor()
@@ -36,4 +43,9 @@ def menu():
             variableQuery(text_inp, cursor)
     cursor.close()
 
-menu()
+try:
+    trial = sys.argv[1].replace("trial", "")
+    menu()
+except IndexError:
+    print("You need to specify the trial that you pretend to analise.")
+    print("     trial[ID]")
