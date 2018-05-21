@@ -1,4 +1,3 @@
-#!/home/henrique/anaconda3/envs/py35/bin/python
 
 import sqlite3
 import sys
@@ -105,15 +104,21 @@ def menu():
             functionQuery(text_inp, cursor)
     cursor.close()
 
-
+trial = None
 #####################
 ##      CALL       ##
 ##  PROVBUG (main) ##
 #####################
 def main():
     try:
-        trial = sys.argv[1].replace("trial", "")
+        global trial
+        if (sys.argv[1] == "trial"):
+            trial = sys.argv[2]
+        elif(sys.argv[1].startswith("trial")):
+            trial = sys.argv[1].replace("trial", "")
         menu()
     except IndexError:
         print("You need to specify the trial that you pretend to analise.")
         print("     trial[ID]")
+
+#main()
