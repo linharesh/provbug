@@ -4,7 +4,10 @@ setup(
     name="provbug",
     packages=["provbug"],
     version="0.0.1",    
-    scripts=['provbug'],
+    scripts=['provbug/provbug.py', 'provbug/FunctionActivation.py', 'provbug/VariableState.py'],
+    entry_points={
+        "console_scripts": ["provbug=provbug:main"]
+    },
     author=("Henrique Linhares, and Rômulo Ponciano"),
     author_email="hlinhares@id.uff.br",
     description="Supporting infrastructure to debug scientific experiments with noworkflow",

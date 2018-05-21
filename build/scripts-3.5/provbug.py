@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/henrique/anaconda3/envs/py35/bin/python
 
 import sqlite3
 import sys
