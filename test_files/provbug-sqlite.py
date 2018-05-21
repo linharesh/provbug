@@ -1,6 +1,9 @@
 import sqlite3
 import sys
 
+from FunctionActivation import FunctionActivation
+from VariableState import VariableState
+
 CT_VARIABLE = "var"
 CT_FUNCTION = "func"
 
@@ -51,7 +54,37 @@ def variableQuery(query, cursor):
         # print result
         cursor.execute(q)
         for linha in cursor.fetchall():
-                print("var " + varName + " = " + str(linha[2]) + " | line: " + str(linha[1]) + " | call: " + linha[3])
+            varst = VariableState(linha)
+            print(str(varst))
+                
+
+#####################
+##     QUERIES     ##
+##    WITH FUNCS   ##
+#####################
+def get_func_activation(id, cursor):
+    id = str(id)
+    query = "select fa.id, fa.name, fa.line, fa.return_value, fa.caller_id from function_activation fa where fa.trial_id = " + trial + " and " + "fa.id = '"+id+"'"
+    cursor.execute(query)
+    for linha in cursor.fetchall():
+        return FunctionActivation(linha)
+        
+def functionQuery(query, cursor):
+    params = query.split(" ")
+    func_name = params[1]
+    result = "fa.id, fa.name, fa.line, fa.return_value, fa.caller_id"
+    query = "select " + result + " from function_activation fa where fa.trial_id = " + trial + " and " + "fa.name = '"+func_name+"'"
+    cursor.execute(query)
+    for linha in cursor.fetchall():
+        fa = FunctionActivation(linha)
+        print("Activation id: "+str(fa.activation_id)+" | Called in Line: " + str(fa.line) + " | Returned: " + str(fa.func_return) + " |")
+        if (fa.has_caller()):
+            current = get_func_activation(fa.caller_id, cursor)
+            print(" ---| Call Stack: "+str(current.name))
+            while (current.has_caller()):
+                current = get_func_activation(current.caller_id, cursor)
+                print(" - - - - - - - -  "+str(current.name))
+    
 
 #####################
 ##      MENU       ##
@@ -66,6 +99,8 @@ def menu():
             help()
         elif (text_inp.startswith(CT_VARIABLE)):
             variableQuery(text_inp, cursor)
+        elif (text_inp.startswith(CT_FUNCTION)):
+            functionQuery(text_inp, cursor)
     cursor.close()
 
 #####################
