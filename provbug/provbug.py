@@ -1,87 +1,115 @@
+import sqlite3
 import sys
-import os.path
-from pyswip import Prolog
+
+from FunctionActivation import FunctionActivation
+from VariableState import VariableState
 
 CT_VARIABLE = "var"
 CT_FUNCTION = "func"
 
-file_name = sys.argv[1]
-if not os.path.isfile(file_name):
-    print("Error: The first parameter should be a file!")
-    exit()
-CT_PROLOG = Prolog()
-CT_PROLOG.consult(file_name)
-print("Provenance data loaded.")
-
+#####################
+##      HELP       ##
+#####################
 def help():
     print("ProvBug: Find bugs by inspecting your script past execution.")
-    print("Queries:")
-    print(CT_VARIABLE+" [VARIABLE_NAME] to inspect a variable")
-    print(CT_FUNCTION+" [FUNCTION_NAME] to inspect function calls")
-    print("Type exit to finish.")
+    print(" \t\tcommand:")
+    print(" " + CT_VARIABLE + " [VARIABLE_NAME] \t\t\t : inspect all values assigned for [VARIABLE_NAME].")
+    print(" " + CT_VARIABLE + " [VARIABLE_NAME] [FUNCTION_NAME]     : inspect all values assigned for [VARIABLE_NAME]")
+    print(" \t\t\t\t\t   that are inside of [FUNCTION_NAME].")
+    print(" " + CT_VARIABLE + " [VARIABLE_NAME] [CONDITION] [VALUE] : inspect all values assigned for [VARIABLE_NAME]")
+    print(" \t\t\t\t\t   that are [CONDITION] [VALUE]. eg \'var result > 20\'")
+    print(" " + CT_FUNCTION + " [FUNCTION_NAME] \t\t\t : inspect all values used inside [FUNCTION_NAME].")
+    print(" exit\t\t\t\t\t : to exit ProvBug.")    
 
-def get_function_name(activationId):
-    funcs = list(CT_PROLOG.query("activation(TrialId,"+str(activationId)+",Name,Line,Start,Finish,CallerActivationId)"))
-    func = funcs[0]
-    return str(func['Name'])
+#####################
+##     CONNECT     ##
+##      TO DB      ##
+#####################
+def connectNoworkflowSqlite():
+    return sqlite3.connect('.noworkflow/db.sqlite').cursor()
+
+#####################
+##     QUERIES     ##
+##    WITH VARS    ##
+#####################
+def variableQuery(query, cursor):
+    params = query.split()
+    result = "v.name, v.line, v.value, f.name"
+    qBase = "select " + result + " from variable v inner join function_activation f on f.id = v.activation_id where f.trial_id = " + trial + " and v.trial_id = " + trial
+    if len(params)>=2:
+        varName = params[1]
+        # command: var [VARIABLE_NAME]
+        if len(params)==2:    
+            q = qBase + " and v.name like \'" + varName + "\'"
+        # command: var [VARIABLE_NAME] [FUNC_NAME]
+        elif len(params)==3:
+            functionName = params[2]
+            q = qBase + " and f.name like \'"+functionName+"\' and v.name like \'"+varName+"\'"
+            print (q)
+        # command: var [VARIABLE_NAME] [CONDITION] [VALUE]
+        elif len(params)==4:
+            condition = params[2]
+            value = params[3]
+            q = qBase + " and v.name like \'" + varName + "\' and v.value " + condition + value
+        # print result
+        cursor.execute(q)
+        for linha in cursor.fetchall():
+            varst = VariableState(linha)
+            print(str(varst))
+                
+
+#####################
+##     QUERIES     ##
+##    WITH FUNCS   ##
+#####################
+def get_func_activation(id, cursor):
+    id = str(id)
+    query = "select fa.id, fa.name, fa.line, fa.return_value, fa.caller_id from function_activation fa where fa.trial_id = " + trial + " and " + "fa.id = '"+id+"'"
+    cursor.execute(query)
+    for linha in cursor.fetchall():
+        return FunctionActivation(linha)
+        
+def functionQuery(query, cursor):
+    params = query.split(" ")
+    func_name = params[1]
+    result = "fa.id, fa.name, fa.line, fa.return_value, fa.caller_id"
+    query = "select " + result + " from function_activation fa where fa.trial_id = " + trial + " and " + "fa.name = '"+func_name+"'"
+    cursor.execute(query)
+    for linha in cursor.fetchall():
+        fa = FunctionActivation(linha)
+        print("Activation id: "+str(fa.activation_id)+" | Called in Line: " + str(fa.line) + " | Returned: " + str(fa.func_return) + " |")
+        if (fa.has_caller()):
+            current = get_func_activation(fa.caller_id, cursor)
+            print(" ---| Call Stack: "+str(current.name))
+            while (current.has_caller()):
+                current = get_func_activation(current.caller_id, cursor)
+                print(" - - - - - - - -  "+str(current.name))
     
-def variable_query(query):
-    variable_name = query.replace(CT_VARIABLE, "").replace(" ", "")
-    variable_occs = list(CT_PROLOG.query("variable(TrialId,ActivationId,Id,'"+variable_name+"',Line,Value,Timestamp)"))
-    if (len(variable_occs) > 0):
-        print('--------------------------------------------------------')
-        print("States of variable: "+str(variable_name))
-        for var in variable_occs:
-            print(variable_name+" was assigned: "+str(var['Value'])+" line: "+str(var['Line'])+" function: "+get_function_name(var['ActivationId']))
 
-def get_caller(activation):
-    caller_id = str(activation['CallerActivationId'])
-    callerlst = list(CT_PROLOG.query("activation(TrialId,"+caller_id+",Name,Line,Start,Finish,CallerActivationId)"))
-    caller = callerlst[0]
-    return caller
-
-def has_caller(activation):
-    if (activation['CallerActivationId'] == 'nil'):
-        return False
-    else:
-        return True
-
-def function_query(query):
-    function_name = query.replace(CT_FUNCTION, "").replace(" ", "")
-    func_activations = list(CT_PROLOG.query("activation(TrialId,Id,'"+function_name+"',Line,Start,Finish,CallerActivationId)"))
-    if (len(func_activations)> 0):
-        print()
-        print('--------------------------------------------------------')
-        print("Activations of Function: "+str(function_name))
-        for res in func_activations:
-            print('--------------------------------------------------------')
-            print(" |> ActivationId: "+ str(res['Id'])+" at line: "+str(res['Line']))
-            
-            if (res['CallerActivationId'] != 'nil'):
-                current = get_caller(res)
-                print(" |> Call stack: "+str(current['Name'])+" at line "+str(current['Line']))
-                while(has_caller(current)):
-                    current = get_caller(current)
-                    print(" |------------: "+str(current['Name'])+" at line "+str(current['Line']))
- 
-            print(" |> Params: ")
-            objs = list(CT_PROLOG.query("object_value(TrialId,"+str(res['Id'])+",Id,Name,Value,Type)"))
-            for obj in objs:
-                print(" ||------Name: "+str(obj['Name'])+" Value: "+obj['Value'])
-        print()
-
-
+#####################
+##      MENU       ##
+#####################
 def menu():
-    text_inp = ""
+    text_inp = "" 
+    cursor = connectNoworkflowSqlite()
     print("Type your query (-h for help or 'exit' to quit)")
     while not (text_inp == "exit"):
         text_inp = input("provbug > ")
         if(text_inp == "-h" or text_inp=="help"):
             help()
         elif (text_inp.startswith(CT_VARIABLE)):
-            variable_query(text_inp)
-        elif text_inp.startswith(CT_FUNCTION):
-            function_query(text_inp)
+            variableQuery(text_inp, cursor)
+        elif (text_inp.startswith(CT_FUNCTION)):
+            functionQuery(text_inp, cursor)
+    cursor.close()
 
-
-menu()
+#####################
+##      CALL       ##
+##  PROVBUG (main) ##
+#####################
+try:
+    trial = sys.argv[1].replace("trial", "")
+    menu()
+except IndexError:
+    print("You need to specify the trial that you pretend to analise.")
+    print("     trial[ID]")
