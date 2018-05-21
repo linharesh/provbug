@@ -7,11 +7,10 @@ setup(
     scripts=['provbug'],
     author=("Henrique Linhares, and Rômulo Ponciano"),
     author_email="hlinhares@id.uff.br",
-    description="Supporting infrastructure to debug scientific experiments with prolog facts.",
+    description="Supporting infrastructure to debug scientific experiments with noworkflow",
     keywords=["scientific", "experiments", "provenance", "debug"],
     url="https://github.com/",
     python_requires='>=3.5',
-    install_requires=["pyswip"],
     classifiers=[
     	'Development Status :: 3 - Alpha',
 
