@@ -22,7 +22,7 @@ License Terms
 
 The MIT License (MIT)
 
-Copyright (c) 2013 Universidade Federal Fluminense (UFF), Polytechnic Institute of New York University.
+Copyright (c) 2018 Universidade Federal Fluminense (UFF)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
