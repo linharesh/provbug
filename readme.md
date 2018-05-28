@@ -40,13 +40,13 @@ provbug trial <id>
 ``` 
 Passing directly the number of trial that he wants to inspect. After that, the Provbug will connect to the SQLite relational database created by noWorkFlow, and will use the information available in that database to perform the queries over variables and functions
 <br><br>
-To inspect variables:<br>
+<b>To inspect variables:</b><br>
 In this way, the developer will not be forced to re-execute the script every time he wants to make a variable inspection.
 ```
 var <name_of_var_inside_script>
 ``` 
 
-To inspect functions:<br>
+<b>To inspect functions:</b><br>
 By inspecting function calls, we allow the developer to have a better understanding about which where the functions that were called during the script execution, how many times a function was called, in which line the function was called, and the call stack.
 ```
 func <name_of_function_inside_script_without_parentheses()>
