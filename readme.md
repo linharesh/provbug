@@ -1,6 +1,19 @@
-Always run provbug with python 3.6  
+Provbug
+==========
+Copyright (c) 2018 Universidade Federal Fluminense (UFF). All rights reserved.
 
-To install:
+Provbug is a tool that consumes provenance data collected by <a href="https://github.com/gems-uff/noworkflow">noWorkFlow</a> to allow a post-execution inspection of a script. The post-execution inspection can be useful to allow the developer to have a better understanding of what happened during an execution, and also to identify, understand and correct defects in the source code, without forcing the developer to re-execute the script. We expect that this approach can be helpful to allow script developers to debug, even if the developer does not have a computer science background.
+<br><br>
+Provbug was designed to work together with <a href="https://github.com/gems-uff/noworkflow">noWorkFlow</a>, so in order to use Provbug to inspect the script past execution, the script developer must use <a href="https://github.com/gems-uff/noworkflow">noWorkFlow</a> to capture the provenance of the script execution.
+<br><br>
+Always run provbug with python 3.5 or 3.6  
+
+Developers:<br>
+<a href="https://github.com/linharesh">Henrique Linhares</a> (UFF)<br>
+<a href="https://github.com/rponciano">Rômulo Ponciano</a> (UFF)
+
+Install
+------------------
 
 1) Clone the repository from https://github.com/linharesh/provbug.git
 ```
@@ -17,12 +30,34 @@ cd provbug
 python setup.py install
 ``` 
 
+Basic Usage
+------------------
+
+To use the functions of Provbug you must execute your script with noWorkflow. Then, in the same directory that contains  the '.noworkflow' folder, you could call:
+
+```
+provbug trial <id> 
+``` 
+Passing directly the number of trial that he wants to inspect. After that, the Provbug will connect to the SQLite relational database created by noWorkFlow, and will use the information available in that database to perform the queries over variables and functions
+<br><br>
+To inspect variables:<br>
+In this way, the developer will not be forced to re-execute the script every time he wants to make a variable inspection.
+```
+var <name_of_var_inside_script>
+``` 
+
+To inspect functions:<br>
+By inspecting function calls, we allow the developer to have a better understanding about which where the functions that were called during the script execution, how many times a function was called, in which line the function was called, and the call stack.
+```
+func <name_of_function_inside_script_without_parentheses()>
+```
+
 License Terms
 -------------
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Universidade Federal Fluminense (UFF)
+Copyright (c) 2018 Universidade Federal Fluminense (UFF). All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
