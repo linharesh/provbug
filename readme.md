@@ -30,6 +30,11 @@ cd provbug
 python setup.py install
 ``` 
 
+If you encounter any problems, just clone this repository, get the file "provbug.py" inside the provbug folder and put this file on the same right where the .noworkflow folder (the folder containing the data) is located. Then, execute:
+```
+python provbug.py trial <id>
+``` 
+
 Basic Usage
 ------------------
 
