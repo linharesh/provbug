@@ -46,13 +46,11 @@ def variableQuery(query, cursor):
         elif len(params)==3:
             functionName = params[2]
             q = qBase + " and f.name like \'"+functionName+"\' and v.name like \'"+varName+"\'"
-            print (q)
         # command: var [VARIABLE_NAME] [CONDITION] [VALUE]
         elif len(params)==4:
             condition = params[2]
             value = params[3]
             q = qBase + " and v.name like \'" + varName + "\' and v.value " + condition + value
-        # print result
         cursor.execute(q)
         for linha in cursor.fetchall():
             varst = VariableState(linha)
