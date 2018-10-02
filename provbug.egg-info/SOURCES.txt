@@ -2,7 +2,9 @@ provbug
 setup.py
 provbug/FunctionActivation.py
 provbug/VariableState.py
+provbug/__init__.py
 provbug/provbug.py
+provbug/repl.py
 provbug.egg-info/PKG-INFO
 provbug.egg-info/SOURCES.txt
 provbug.egg-info/dependency_links.txt
