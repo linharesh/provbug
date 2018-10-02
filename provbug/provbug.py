@@ -8,7 +8,19 @@ from .VariableState import VariableState
 from .repl import repl
 
 
+class DisplayResults(list):
+    """Display list resuls without the square brackets"""
+
+    def __init__(self, *args, header="List: \n"):
+        super(DisplayResults, self).__init__(*args)
+        self.header = header
+
+    def __repr__(self):
+        return self.header + "\n".join(map(repr, self))
+
+
 class ProvBug(object):
+    """ProvBug object. The repl access functions from it"""
 
     def __init__(self, trial_id):
         self.trial_id = trial_id
@@ -34,7 +46,7 @@ class ProvBug(object):
             inspect.cleandoc(func.__doc__)
             for func in (self.help, self.var, self.func)
         ))
-        print(help_txt)
+        return DisplayResults([help_txt], header="")
 
     def var(self, var_name, func=None, cond=None, value=None):
         """Query variables:
@@ -64,9 +76,8 @@ class ProvBug(object):
             args.append(value)
 
         self.cursor.execute(query, args)
-        for linha in self.cursor.fetchall():
-            varst = VariableState(linha)
-            print(str(varst))
+        result = [VariableState(row) for row in self.cursor.fetchall()]
+        return DisplayResults(result, header="List of variables:\n")
 
     def _get_func_activation(self, activation_id):
         """Get functon activation by id"""
@@ -79,8 +90,17 @@ class ProvBug(object):
         args = [self.trial_id, activation_id]
 
         self.cursor.execute(query, args)
-        for linha in self.cursor.fetchall():
-            return FunctionActivation(linha)
+        for row in self.cursor.fetchall():
+            return FunctionActivation(row)
+
+    def _create_func_stack(self, func_activation):
+        """Populate function stack for function"""
+        current = func_activation
+        while current.has_caller():
+            current = self._get_func_activation(current.caller_id)
+            func_activation.stack.append(current)
+        return func_activation
+
 
     def func(self, func_name):
         """Query functions:
@@ -94,18 +114,11 @@ class ProvBug(object):
         )
         args = [self.trial_id, func_name]
         self.cursor.execute(query, args)
-        for linha in self.cursor.fetchall():
-            fa = FunctionActivation(linha)
-            print(
-                "Activation id: {} | Called in Line: {} | Returned: {} |"
-                .format(fa.activation_id, fa.line, fa.func_return)
-            )
-            if (fa.has_caller()):
-                current = self._get_func_activation(fa.caller_id)
-                print(" ---| Call Stack: {}".format(current.name))
-                while (current.has_caller()):
-                    current = self._get_func_activation(current.caller_id)
-                    print(" - - - - - - - -  {}".format(current.name))
+        result = [
+            self._create_func_stack(FunctionActivation(row))
+            for row in self.cursor.fetchall()
+        ]
+        return DisplayResults(result, header="List of functions:\n")
 
 def main():
     """Main function"""

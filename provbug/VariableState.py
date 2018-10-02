@@ -6,8 +6,9 @@ class VariableState:
         self.value = strings[2]
         self.function = strings[3]
 
-    def __str__(self):
-        return "var " + str(self.name) + " = " + str(self.value) + " | line: " + str(self.line) + " | function: " + str(self.function)
-
-
+    def __repr__(self):
+        return (
+            "var {0.name} = {0.value} | line: {0.line} | function: {0.function}"
+            .format(self)
+        )
         
