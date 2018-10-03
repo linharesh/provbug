@@ -2,7 +2,7 @@ Metadata-Version: 1.2
 Name: provbug
 Version: 0.0.1
 Summary: Supporting infrastructure to debug scientific experiments with noworkflow
-Home-page: https://github.com/
+Home-page: https://github.com/linharesh/provbug
 Author: Henrique Linhares, and Rômulo Ponciano
 Author-email: hlinhares@id.uff.br
 License: UNKNOWN
